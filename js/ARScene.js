@@ -21,7 +21,11 @@ export class ARScene {
         document.body.appendChild(this.renderer.domElement);
 
         // Кнопка AR
-        document.body.appendChild(ARButton.createButton(this.renderer, { requiredFeatures: ['hit-test'] }));
+        document.body.appendChild(ARButton.createButton(this.renderer, {
+            requiredFeatures: ['hit-test'],
+            optionalFeatures: ['dom-overlay'],           // ← Включаем наложение HTML
+            domOverlay: { root: document.getElementById('ui-panel') } // ← Указываем, какой блок показывать
+        }));
 
         // Освещение (базовое, HDRI добавится позже)
         const hemiLight = new THREE.HemisphereLight(0xffffff, 0xbbbbff, 1);
