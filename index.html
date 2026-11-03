@@ -67,18 +67,12 @@
     </script>
 </head>
 <body>
-    <!-- Панель управления -->
-    <div id="ui-panel">
-        <!-- Палитра цветов -->
+    <div id="ar-overlay" style="display: none; position: absolute; bottom: 20px; left: 0; width: 100%; flex-direction: column; align-items: center; gap: 10px; z-index: 1000; pointer-events: none;">
         <div class="color-palette">
             <div class="color-circle" style="background: #ff5733;" data-color="0xff5733"></div>
             <div class="color-circle" style="background: #33ff57;" data-color="0x33ff57"></div>
             <div class="color-circle" style="background: #3357ff;" data-color="0x3357ff"></div>
-            <div class="color-circle" style="background: #ff33f1;" data-color="0xff33f1"></div>
-            <div class="color-circle" style="background: #ffd733;" data-color="0xffd733"></div>
         </div>
-        
-        <!-- Кнопки действий -->
         <div class="btn-row">
             <button id="btn-rotate">Повернуть</button>
             <button id="btn-model">Сменить модель</button>

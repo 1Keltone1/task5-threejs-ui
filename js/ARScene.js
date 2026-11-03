@@ -23,8 +23,8 @@ export class ARScene {
         // Кнопка AR
         document.body.appendChild(ARButton.createButton(this.renderer, {
             requiredFeatures: ['hit-test'],
-            optionalFeatures: ['dom-overlay'],           // ← Включаем наложение HTML
-            domOverlay: { root: document.getElementById('ui-panel') } // ← Указываем, какой блок показывать
+            optionalFeatures: ['dom-overlay'],
+            domOverlay: { root: document.getElementById('ar-overlay') }
         }));
 
         // Освещение (базовое, HDRI добавится позже)
