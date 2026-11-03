@@ -10,9 +10,9 @@ export class UI {
         const panel = document.createElement('div');
         panel.id = 'ui-panel';
         panel.innerHTML = `
-            <button id="btn-color">🎨 Сменить цвет</button>
-            <button id="btn-rotate">🔄 Повернуть</button>
-            <button id="btn-clear">🗑️ Очистить</button>
+            <button id="btn-color">Сменить цвет</button>
+            <button id="btn-rotate">Повернуть</button>
+            <button id="btn-clear">Очистить</button>
         `;
         document.body.appendChild(panel);
 
