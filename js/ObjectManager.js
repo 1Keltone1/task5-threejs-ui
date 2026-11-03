@@ -20,13 +20,11 @@ export class ObjectManager {
         try {
             this.models.pin = await loadModel('models/pin.glb');
             this.models.sovunya = await loadModel('models/sovunya.glb');
-            console.log('Обе модели успешно загружены');
         } catch (error) {
             console.error('Ошибка загрузки моделей:', error);
         }
     }
 
-    // Этот метод вызывается ТОЛЬКО при тапе по экрану в AR
     placeObject(reticle) {
         const template = this.models[this.currentModelKey];
         if (!template) return;
@@ -54,7 +52,6 @@ export class ObjectManager {
         return clone;
     }
 
-    // Вспомогательный метод: получить последний добавленный объект
     getLastObject() {
         if (this.objects.length === 0) return null;
         return this.objects[this.objects.length - 1];
@@ -62,7 +59,7 @@ export class ObjectManager {
 
     // Меняем цвет ТОЛЬКО у последнего
     changeColor(colorHex) {
-        this.currentColor = colorHex; // Запоминаем для будущих
+        this.currentColor = colorHex; 
         const lastObj = this.getLastObject();
         if (!lastObj) return;
         
@@ -71,24 +68,40 @@ export class ObjectManager {
         });
     }
 
-    // Поворачиваем ТОЛЬКО последний
-    rotateLast() {
+    // Плавный поворот ТОЛЬКО последнего
+    rotateLast(amount = Math.PI / 4) {
         const lastObj = this.getLastObject();
         if (!lastObj) return;
-        lastObj.rotation.y += Math.PI / 4;
+        
+        // Используем анимацию для плавности
+        const targetRotation = lastObj.rotation.y + amount;
+        const startTime = performance.now();
+        const duration = 300; // 300 мс на поворот
+        const startRotation = lastObj.rotation.y;
+
+        const animateRotation = (time) => {
+            const elapsed = time - startTime;
+            const progress = Math.min(elapsed / duration, 1);
+            // Плавная функция ease-in-out
+            const ease = progress < 0.5 ? 2 * progress * progress : 1 - Math.pow(-2 * progress + 2, 2) / 2;
+            
+            lastObj.rotation.y = startRotation + (targetRotation - startRotation) * ease;
+
+            if (progress < 1) {
+                requestAnimationFrame(animateRotation);
+            }
+        };
+        requestAnimationFrame(animateRotation);
     }
 
     // Меняем модель для будущих объектов
     toggleModel() {
         this.currentModelKey = this.currentModelKey === 'pin' ? 'sovunya' : 'pin';
-        console.log('Следующая модель будет:', this.currentModelKey);
     }
 
-    // Очищаем ТОЛЬКО последний
-    removeLast() {
-        const lastObj = this.getLastObject();
-        if (!lastObj) return;
-        this.scene.remove(lastObj);
-        this.objects.pop();
+    // Очищаем ВСЕ объекты
+    clearAll() {
+        this.objects.forEach(obj => this.scene.remove(obj));
+        this.objects = []; // Очищаем массив
     }
 }
