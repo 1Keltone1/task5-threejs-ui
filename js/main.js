@@ -10,6 +10,11 @@ async function main() {
     await objectManager.init();
 
     new UI(objectManager, arScene);
+
+    // Привязываем HTML-кнопку к запуску AR
+    document.getElementById('start-ar-btn').addEventListener('click', () => {
+        arScene.startAR();
+    });
 }
 
 main();

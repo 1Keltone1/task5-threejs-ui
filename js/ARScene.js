@@ -1,5 +1,4 @@
 import * as THREE from 'three';
-import { ARButton } from 'three/addons/webxr/ARButton.js';
 import { RGBELoader } from 'three/addons/loaders/RGBELoader.js';
 
 export class ARScene {
@@ -7,51 +6,39 @@ export class ARScene {
         this.scene = new THREE.Scene();
         this.camera = new THREE.PerspectiveCamera(70, window.innerWidth / window.innerHeight, 0.01, 20);
         this.renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
+        
         this.reticle = null;
         this.hitTestSource = null;
         this.hitTestSourceRequested = false;
         this.onSelectCallback = null;
+        this.xrSession = null;
     }
 
     async init() {
-        // Рендерер
         this.renderer.setPixelRatio(window.devicePixelRatio);
         this.renderer.setSize(window.innerWidth, window.innerHeight);
         this.renderer.xr.enabled = true;
         document.body.appendChild(this.renderer.domElement);
 
-        // Кнопка AR
-        document.body.appendChild(ARButton.createButton(this.renderer, {
-            requiredFeatures: ['hit-test'],
-            optionalFeatures: ['dom-overlay'],
-            domOverlay: { root: document.getElementById('ar-overlay') }
-        }));
-
-        // Освещение (базовое, HDRI добавится позже)
         const hemiLight = new THREE.HemisphereLight(0xffffff, 0xbbbbff, 1);
         hemiLight.position.set(0.5, 1, 0.25);
         this.scene.add(hemiLight);
 
-        // Ретикл
         this.reticle = new THREE.Mesh(
             new THREE.RingGeometry(0.15, 0.2, 32).rotateX(-Math.PI / 2),
-            new THREE.MeshBasicMaterial()
+            new THREE.MeshBasicMaterial({ color: 0x00ff00 })
         );
         this.reticle.matrixAutoUpdate = false;
         this.reticle.visible = false;
         this.scene.add(this.reticle);
 
-        // HDRI-освещение
         await this.loadEnvironment('hdr/puresky.hdr');
 
-        // Контроллер для тапов
         const controller = this.renderer.xr.getController(0);
         controller.addEventListener('select', () => this.onSelect());
         this.scene.add(controller);
 
-        // Ресайз
         window.addEventListener('resize', () => this.onWindowResize());
-
         this.renderer.setAnimationLoop((t, frame) => this.render(t, frame));
     }
 
@@ -59,10 +46,42 @@ export class ARScene {
         return new Promise((resolve, reject) => {
             new RGBELoader().load(url, (hdr) => {
                 hdr.mapping = THREE.EquirectangularReflectionMapping;
-                this.scene.environment = hdr; // PBR-материалы автоматически подхватят это
+                this.scene.environment = hdr;
                 resolve();
             }, undefined, reject);
         });
+    }
+
+    async startAR() {
+        if (!navigator.xr) {
+            alert("WebXR не поддерживается вашим браузером. Используйте Chrome на Android.");
+            return;
+        }
+
+        try {
+            this.xrSession = await navigator.xr.requestSession('immersive-ar', {
+                requiredFeatures: ['hit-test', 'local-floor'],
+                optionalFeatures: ['dom-overlay'],
+                domOverlay: { root: document.getElementById('ar-overlay') }
+            });
+
+            await this.renderer.xr.setSession(this.xrSession);
+
+            // Переключаем UI
+            document.getElementById('start-ar-btn').style.display = 'none';
+            document.getElementById('ar-overlay').style.display = 'flex';
+
+            // Возвращаем UI при выходе
+            this.xrSession.addEventListener('end', () => {
+                document.getElementById('start-ar-btn').style.display = 'block';
+                document.getElementById('ar-overlay').style.display = 'none';
+                this.xrSession = null;
+            });
+
+        } catch (error) {
+            console.error("Ошибка запуска AR:", error);
+            alert("Не удалось запустить AR: " + error.message);
+        }
     }
 
     onSelect() {
@@ -72,17 +91,16 @@ export class ARScene {
     }
 
     render(timestamp, frame) {
-        if (frame) {
+        if (frame && this.xrSession) {
             const referenceSpace = this.renderer.xr.getReferenceSpace();
-            const session = this.renderer.xr.getSession();
 
             if (!this.hitTestSourceRequested) {
-                session.requestReferenceSpace('viewer').then((refSpace) => {
-                    session.requestHitTestSource({ space: refSpace }).then((source) => {
+                this.xrSession.requestReferenceSpace('viewer').then((refSpace) => {
+                    this.xrSession.requestHitTestSource({ space: refSpace }).then((source) => {
                         this.hitTestSource = source;
                     });
                 });
-                session.addEventListener('end', () => {
+                this.xrSession.addEventListener('end', () => {
                     this.hitTestSourceRequested = false;
                     this.hitTestSource = null;
                 });

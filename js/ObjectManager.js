@@ -8,7 +8,7 @@ export class ObjectManager {
         this.models = {};
         this.currentModelKey = 'pin';
         this.currentColor = 0xffffff;
-        this.currentScale = 0.5;
+        this.currentScale = 0.5; // Размер моделек
     }
 
     async init() {
@@ -57,7 +57,6 @@ export class ObjectManager {
         return this.objects[this.objects.length - 1];
     }
 
-    // Меняем цвет ТОЛЬКО у последнего
     changeColor(colorHex) {
         this.currentColor = colorHex; 
         const lastObj = this.getLastObject();
@@ -68,40 +67,31 @@ export class ObjectManager {
         });
     }
 
-    // Плавный поворот ТОЛЬКО последнего
     rotateLast(amount = Math.PI / 4) {
         const lastObj = this.getLastObject();
         if (!lastObj) return;
         
-        // Используем анимацию для плавности
         const targetRotation = lastObj.rotation.y + amount;
         const startTime = performance.now();
-        const duration = 300; // 300 мс на поворот
+        const duration = 300;
         const startRotation = lastObj.rotation.y;
 
         const animateRotation = (time) => {
             const elapsed = time - startTime;
             const progress = Math.min(elapsed / duration, 1);
-            // Плавная функция ease-in-out
             const ease = progress < 0.5 ? 2 * progress * progress : 1 - Math.pow(-2 * progress + 2, 2) / 2;
-            
             lastObj.rotation.y = startRotation + (targetRotation - startRotation) * ease;
-
-            if (progress < 1) {
-                requestAnimationFrame(animateRotation);
-            }
+            if (progress < 1) requestAnimationFrame(animateRotation);
         };
         requestAnimationFrame(animateRotation);
     }
 
-    // Меняем модель для будущих объектов
     toggleModel() {
         this.currentModelKey = this.currentModelKey === 'pin' ? 'sovunya' : 'pin';
     }
 
-    // Очищаем ВСЕ объекты
     clearAll() {
         this.objects.forEach(obj => this.scene.remove(obj));
-        this.objects = []; // Очищаем массив
+        this.objects = []; 
     }
 }

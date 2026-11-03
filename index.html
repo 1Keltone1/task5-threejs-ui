@@ -5,76 +5,70 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>WebAR — Задание 5: Three.js + UI + HDRI</title>
     <style>
-        body { 
-            margin: 0; 
-            overflow: hidden; 
-            background: #000; 
-            font-family: sans-serif; 
+        body { margin: 0; overflow: hidden; background: #000; font-family: sans-serif; }
+        
+        /* Кнопка запуска AR (видна до входа) */
+        #start-ar-btn {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            padding: 15px 30px;
+            font-size: 18px;
+            background: #007bff;
+            color: white;
+            border: none;
+            border-radius: 30px;
+            cursor: pointer;
+            z-index: 1000;
+            box-shadow: 0 4px 15px rgba(0,123,255,0.4);
         }
 
-        /* Контейнер для AR-оверлея (кнопок внутри AR) */
+        /* Панель управления в AR (скрыта по умолчанию) */
         #ar-overlay {
             position: absolute;
             bottom: 20px;
             left: 0;
             width: 100%;
-            display: flex;
+            display: none; /* Появится при входе в AR */
             flex-direction: column;
             align-items: center;
             gap: 15px;
             z-index: 1000;
-            pointer-events: none; /* Пропускаем тапы сквозь пустые места */
+            pointer-events: none;
         }
 
-        /* Контейнер для кнопок */
-        .btn-row {
-            display: flex;
-            gap: 10px;
-            pointer-events: auto; /* Включаем клики по кнопкам */
-        }
+        .btn-row { display: flex; gap: 10px; pointer-events: auto; }
 
-        /* Стили кнопок */
-        button {
+        button.action-btn {
             padding: 12px 18px;
             border-radius: 8px;
             border: 1px solid rgba(255, 255, 255, 0.5);
             background: rgba(0, 0, 0, 0.6);
             color: #fff;
-            font-size: 15px;
+            font-size: 14px;
             cursor: pointer;
             backdrop-filter: blur(4px);
-            -webkit-backdrop-filter: blur(4px);
-            transition: background 0.2s;
         }
-        button:active { 
-            background: rgba(255, 255, 255, 0.3); 
-        }
+        button.action-btn:active { background: rgba(255, 255, 255, 0.3); }
 
-        /* Палитра цветов */
         .color-palette {
             display: flex;
-            gap: 12px;
-            background: rgba(0, 0, 0, 0.5);
+            gap: 10px;
+            background: rgba(0, 0, 0, 0.6);
             padding: 10px 15px;
             border-radius: 30px;
-            pointer-events: auto; /* Включаем клики по палитре */
+            pointer-events: auto;
             backdrop-filter: blur(4px);
-            -webkit-backdrop-filter: blur(4px);
         }
-
-        /* Кружки цветов */
         .color-circle {
-            width: 36px;
-            height: 36px;
+            width: 32px;
+            height: 32px;
             border-radius: 50%;
             border: 2px solid rgba(255, 255, 255, 0.8);
             cursor: pointer;
-            box-shadow: 0 2px 5px rgba(0,0,0,0.3);
-            transition: transform 0.1s;
         }
-        .color-circle:active {
-            transform: scale(0.9);
-        }
+        .color-circle:active { transform: scale(0.9); }
     </style>
     
     <script type="importmap">
@@ -87,23 +81,22 @@
     </script>
 </head>
 <body>
-    <!-- Контейнер для кнопок, который будет передан в domOverlay -->
+    <!-- Кнопка запуска -->
+    <button id="start-ar-btn">Запустить AR</button>
+
+    <!-- Оверлей внутри AR -->
     <div id="ar-overlay">
-        <!-- Палитра цветов -->
         <div class="color-palette">
             <div class="color-circle" style="background: #ff5733;" data-color="0xff5733"></div>
             <div class="color-circle" style="background: #33ff57;" data-color="0x33ff57"></div>
             <div class="color-circle" style="background: #3357ff;" data-color="0x3357ff"></div>
             <div class="color-circle" style="background: #ff33f1;" data-color="0xff33f1"></div>
-            <div class="color-circle" style="background: #ffd733;" data-color="0xffd733"></div>
             <div class="color-circle" style="background: #ffffff;" data-color="0xffffff"></div>
         </div>
-        
-        <!-- Кнопки управления -->
         <div class="btn-row">
-            <button id="btn-rotate">Повернуть</button>
-            <button id="btn-model">Сменить модель</button>
-            <button id="btn-clear">Очистить</button>
+            <button class="action-btn" id="btn-rotate">Повернуть</button>
+            <button class="action-btn" id="btn-model">Сменить модель</button>
+            <button class="action-btn" id="btn-clear">Очистить</button>
         </div>
     </div>
 
