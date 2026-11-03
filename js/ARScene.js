@@ -38,7 +38,7 @@ export class ARScene {
         this.scene.add(this.reticle);
 
         // HDRI-освещение
-        await this.loadEnvironment('hdr/studio_small_03_1k.hdr');
+        await this.loadEnvironment('hdr/puresky.hdr');
 
         // Контроллер для тапов
         const controller = this.renderer.xr.getController(0);

@@ -7,6 +7,8 @@ async function main() {
     await arScene.init();
 
     const objectManager = new ObjectManager(arScene.scene);
+    await objectManager.init();
+
     new UI(objectManager, arScene);
 }
 
