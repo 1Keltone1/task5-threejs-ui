@@ -4,14 +4,14 @@ export class UI {
         this.arScene = arScene;
         this.setupUI();
         
-        // При клике на экран в AR вызываем placeObject
+        // Вызов создания объекта ТОЛЬКО по тапу в AR
         this.arScene.onSelectCallback = (reticle) => this.om.placeObject(reticle);
     }
 
     setupUI() {
-        // Кнопки
-        document.getElementById('btn-rotate').onclick = () => this.om.rotateAll();
-        document.getElementById('btn-clear').onclick = () => this.om.clearAll();
+        // Убедитесь, что ID кнопок в HTML совпадают с этими
+        document.getElementById('btn-rotate').onclick = () => this.om.rotateLast();
+        document.getElementById('btn-clear').onclick = () => this.om.removeLast();
         document.getElementById('btn-model').onclick = () => this.om.toggleModel();
 
         // Палитра цветов

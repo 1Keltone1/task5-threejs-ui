@@ -5,18 +5,14 @@ export class ObjectManager {
     constructor(scene) {
         this.scene = scene;
         this.objects = [];
-        this.models = {}; // Хранилище загруженных моделей
+        this.models = {};
         this.currentModelKey = 'pin';
         this.currentColor = 0xffffff;
-        
-        // Увеличиваем масштаб (было 0.2, ставим 0.5 для примера)
-        this.currentScale = 0.5; 
+        this.currentScale = 0.5;
     }
 
     async init() {
         const loader = new GLTFLoader();
-        
-        // Загружаем обе модели
         const loadModel = (path) => new Promise((resolve, reject) => {
             loader.load(path, (gltf) => resolve(gltf.scene), undefined, reject);
         });
@@ -30,16 +26,15 @@ export class ObjectManager {
         }
     }
 
+    // Этот метод вызывается ТОЛЬКО при тапе по экрану в AR
     placeObject(reticle) {
         const template = this.models[this.currentModelKey];
         if (!template) return;
 
         const clone = template.clone(true);
         
-        // Применяем PBR-материал и цвет
         clone.traverse((node) => {
             if (node.isMesh) {
-                // Сохраняем текстуру, если она была
                 const oldMap = node.material.map || null;
                 node.material = new THREE.MeshStandardMaterial({
                     color: this.currentColor,
@@ -59,35 +54,41 @@ export class ObjectManager {
         return clone;
     }
 
+    // Вспомогательный метод: получить последний добавленный объект
+    getLastObject() {
+        if (this.objects.length === 0) return null;
+        return this.objects[this.objects.length - 1];
+    }
+
+    // Меняем цвет ТОЛЬКО у последнего
     changeColor(colorHex) {
-        this.currentColor = colorHex;
-        this.objects.forEach((obj) => {
-            obj.traverse((node) => {
-                if (node.isMesh) node.material.color.set(colorHex);
-            });
+        this.currentColor = colorHex; // Запоминаем для будущих
+        const lastObj = this.getLastObject();
+        if (!lastObj) return;
+        
+        lastObj.traverse((node) => {
+            if (node.isMesh) node.material.color.set(colorHex);
         });
     }
 
+    // Поворачиваем ТОЛЬКО последний
+    rotateLast() {
+        const lastObj = this.getLastObject();
+        if (!lastObj) return;
+        lastObj.rotation.y += Math.PI / 4;
+    }
+
+    // Меняем модель для будущих объектов
     toggleModel() {
         this.currentModelKey = this.currentModelKey === 'pin' ? 'sovunya' : 'pin';
-        console.log('Текущая модель:', this.currentModelKey);
-        // Если хотите, чтобы старые объекты тоже менялись, раскомментируйте код ниже:
-        /*
-        this.objects.forEach((obj, index) => {
-            this.scene.remove(obj);
-        });
-        this.objects = [];
-        */
+        console.log('Следующая модель будет:', this.currentModelKey);
     }
 
-    rotateAll() {
-        this.objects.forEach((obj) => {
-            obj.rotation.y += Math.PI / 4;
-        });
-    }
-
-    clearAll() {
-        this.objects.forEach((obj) => this.scene.remove(obj));
-        this.objects = [];
+    // Очищаем ТОЛЬКО последний
+    removeLast() {
+        const lastObj = this.getLastObject();
+        if (!lastObj) return;
+        this.scene.remove(lastObj);
+        this.objects.pop();
     }
 }
