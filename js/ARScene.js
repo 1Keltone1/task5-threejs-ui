@@ -10,7 +10,6 @@ export class ARScene {
         this.reticle = null;
         this.hitTestSource = null;
         this.hitTestSourceRequested = false;
-        this.onSelectCallback = null;
         this.xrSession = null;
     }
 
@@ -20,11 +19,9 @@ export class ARScene {
         this.renderer.xr.enabled = true;
         document.body.appendChild(this.renderer.domElement);
 
-        // Свет (в дополнение к HDRI)
         const hemiLight = new THREE.HemisphereLight(0xffffff, 0xbbbbff, 1);
         this.scene.add(hemiLight);
 
-        // Маркер (Reticle)
         this.reticle = new THREE.Mesh(
             new THREE.RingGeometry(0.15, 0.2, 32).rotateX(-Math.PI / 2),
             new THREE.MeshBasicMaterial({ color: 0x00ff00 })
@@ -33,13 +30,7 @@ export class ARScene {
         this.reticle.visible = false;
         this.scene.add(this.reticle);
 
-        // HDRI Освещение
         await this.loadEnvironment('hdr/puresky.hdr');
-
-        // Контроллер тапов
-        const controller = this.renderer.xr.getController(0);
-        controller.addEventListener('select', () => this.onSelect());
-        this.scene.add(controller);
 
         window.addEventListener('resize', () => this.onWindowResize());
         this.renderer.setAnimationLoop((t, frame) => this.render(t, frame));
@@ -49,7 +40,7 @@ export class ARScene {
         return new Promise((resolve, reject) => {
             new RGBELoader().load(url, (hdr) => {
                 hdr.mapping = THREE.EquirectangularReflectionMapping;
-                this.scene.environment = hdr; // Применяем HDRI
+                this.scene.environment = hdr;
                 resolve();
             }, undefined, reject);
         });
@@ -70,7 +61,6 @@ export class ARScene {
 
             await this.renderer.xr.setSession(this.xrSession);
 
-            // Переключаем UI
             document.getElementById('start-ar-btn').style.display = 'none';
             document.getElementById('ar-overlay').style.display = 'flex';
 
@@ -83,12 +73,6 @@ export class ARScene {
         } catch (error) {
             console.error("Ошибка AR:", error);
             alert("Не удалось запустить AR: " + error.message);
-        }
-    }
-
-    onSelect() {
-        if (this.reticle.visible && this.onSelectCallback) {
-            this.onSelectCallback(this.reticle);
         }
     }
 

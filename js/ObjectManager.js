@@ -2,13 +2,14 @@ import * as THREE from 'three';
 import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
 
 export class ObjectManager {
-    constructor(scene) {
+    constructor(scene, arScene) {
         this.scene = scene;
+        this.arScene = arScene; // Нам нужен доступ к ретиклу
         this.objects = [];
         this.models = {};
-        this.currentModelKey = 'pin'; // Какая модель будет добавлена следующей
-        this.currentColor = 0xffffff; // Текущий цвет
-        this.currentScale = 0.5;      // Масштаб
+        this.currentModelKey = 'pin';
+        this.currentColor = 0xffffff;
+        this.currentScale = 0.5;
     }
 
     async init() {
@@ -20,20 +21,24 @@ export class ObjectManager {
         try {
             this.models.pin = await loadModel('models/pin.glb');
             this.models.sovunya = await loadModel('models/sovunya.glb');
-            console.log('Модели загружены');
         } catch (error) {
             console.error('Ошибка загрузки моделей:', error);
         }
     }
 
-    // Вызывается при тапе по экрану
-    placeObject(reticle) {
+    // Вызывается ТОЛЬКО по кнопке "Добавить"
+    addModel() {
+        const reticle = this.arScene.reticle;
+        if (!reticle || !reticle.visible) {
+            alert("Наведите камеру на ровную поверхность, чтобы добавить модель!");
+            return;
+        }
+
         const template = this.models[this.currentModelKey];
         if (!template) return;
 
         const clone = template.clone(true);
         
-        // Настраиваем PBR-материал
         clone.traverse((node) => {
             if (node.isMesh) {
                 const oldMap = node.material.map || null;
@@ -54,13 +59,11 @@ export class ObjectManager {
         this.objects.push(clone);
     }
 
-    // Получить последний добавленный объект
     getLastObject() {
         if (this.objects.length === 0) return null;
         return this.objects[this.objects.length - 1];
     }
 
-    // Изменить цвет ТОЛЬКО последнего
     changeColor(colorHex) {
         this.currentColor = colorHex; 
         const lastObj = this.getLastObject();
@@ -71,7 +74,6 @@ export class ObjectManager {
         });
     }
 
-    // Повернуть ТОЛЬКО последний (плавно)
     rotateLast() {
         const lastObj = this.getLastObject();
         if (!lastObj) return;
@@ -91,17 +93,12 @@ export class ObjectManager {
         requestAnimationFrame(animateRotation);
     }
 
-    // Переключить модель для следующих объектов
     toggleModel() {
         this.currentModelKey = this.currentModelKey === 'pin' ? 'sovunya' : 'pin';
-        console.log('Следующая модель:', this.currentModelKey);
     }
 
-    // Удалить ВСЕ объекты
     clearAll() {
-        this.objects.forEach(obj => {
-            this.scene.remove(obj);
-        });
+        this.objects.forEach(obj => this.scene.remove(obj));
         this.objects = []; 
     }
 }
