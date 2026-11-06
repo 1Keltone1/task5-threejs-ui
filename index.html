@@ -9,8 +9,7 @@
         
         /* Кнопка запуска AR (до входа) */
         #start-ar-btn {
-            position: fixed; 
-            top: 50%; left: 50%;
+            position: fixed; top: 50%; left: 50%;
             transform: translate(-50%, -50%);
             padding: 15px 30px; font-size: 18px;
             background: #007bff; color: white;
@@ -18,28 +17,34 @@
             z-index: 10000;
         }
 
-        /* Нижняя панель управления (внутри AR) */
+        /* Главный контейнер, который занимает ВЕСЬ экран */
         #ar-overlay {
-            position: fixed; /* Жесткая фиксация во вьюпорте */
-            top: auto !important; 
-            bottom: 20px !important; /* Прибиваем к полу */
-            left: 0;
-            right: 0;
+            position: fixed; 
+            top: 0; left: 0; right: 0; bottom: 0;
             width: 100vw;
-            display: none; 
-            flex-direction: column; 
+            height: 100vh;
+            display: none; /* Появится при входе в AR */
+            flex-direction: column; /* Элементы друг под другом */
+            justify-content: flex-end; /* Прижимаем всё к НИЗУ */
             align-items: center; 
             gap: 12px;
             z-index: 10000; 
-            pointer-events: none;
+            pointer-events: none; /* Пропускаем клики в 3D */
             box-sizing: border-box;
+            padding-bottom: 20px; /* Отступ от нижнего края */
         }
 
-        /* Ряд с кнопками действий */
+        /* Тот самый "пустышка", который выталкивает кнопки вниз */
+        .spacer {
+            flex-grow: 1; /* Занимает всё свободное пространство сверху */
+            pointer-events: none;
+        }
+
+        /* Ряд с кнопками */
         .btn-row { 
             display: flex; 
             gap: 8px; 
-            pointer-events: auto;
+            pointer-events: auto; /* Кнопки кликабельны */
             flex-wrap: wrap; 
             justify-content: center;
             width: 100%;
@@ -87,6 +92,7 @@
         }
         .color-circle:active { transform: scale(0.9); }
     </style>
+    
     <script type="importmap">
         {
             "imports": {
@@ -99,7 +105,11 @@
 <body>
     <button id="start-ar-btn">Запустить AR</button>
 
+    <!-- Оверлей на весь экран -->
     <div id="ar-overlay">
+        <!-- Пустой блок, который выталкивает кнопки вниз -->
+        <div class="spacer"></div>
+
         <!-- Палитра цветов -->
         <div class="color-palette">
             <div class="color-circle" style="background: #ff5733;" data-color="0xff5733"></div>
