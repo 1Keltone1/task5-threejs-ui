@@ -3,74 +3,50 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>WebAR — Задание 5: Three.js + UI + HDRI</title>
+    <title>WebAR — Задание 5</title>
     <style>
         body { margin: 0; overflow: hidden; background: #000; font-family: sans-serif; }
         
-        /* Кнопка запуска AR (видна до входа) */
+        /* Кнопка запуска AR */
         #start-ar-btn {
-            position: absolute;
-            top: 50%;
-            left: 50%;
+            position: absolute; top: 50%; left: 50%;
             transform: translate(-50%, -50%);
-            padding: 15px 30px;
-            font-size: 18px;
-            background: #007bff;
-            color: white;
-            border: none;
-            border-radius: 30px;
-            cursor: pointer;
+            padding: 15px 30px; font-size: 18px;
+            background: #007bff; color: white;
+            border: none; border-radius: 30px; cursor: pointer;
             z-index: 1000;
-            box-shadow: 0 4px 15px rgba(0,123,255,0.4);
         }
 
-        /* Панель управления в AR (скрыта по умолчанию) */
+        /* Панель управления в AR */
         #ar-overlay {
-            position: absolute;
-            bottom: 20px;
-            left: 0;
-            width: 100%;
-            display: none; /* Появится при входе в AR */
-            flex-direction: column;
-            align-items: center;
-            gap: 15px;
-            z-index: 1000;
-            pointer-events: none;
+            position: absolute; bottom: 20px; left: 0; width: 100%;
+            display: none; flex-direction: column; align-items: center; gap: 15px;
+            z-index: 1000; pointer-events: none; /* Пропускаем клики в пустых местах */
         }
 
-        .btn-row { display: flex; gap: 10px; pointer-events: auto; }
+        .btn-row { display: flex; gap: 10px; pointer-events: auto; /* Включаем клики по кнопкам */ }
 
         button.action-btn {
-            padding: 12px 18px;
-            border-radius: 8px;
+            padding: 12px 18px; border-radius: 8px;
             border: 1px solid rgba(255, 255, 255, 0.5);
-            background: rgba(0, 0, 0, 0.6);
-            color: #fff;
-            font-size: 14px;
-            cursor: pointer;
-            backdrop-filter: blur(4px);
+            background: rgba(0, 0, 0, 0.6); color: #fff;
+            font-size: 14px; cursor: pointer;
         }
         button.action-btn:active { background: rgba(255, 255, 255, 0.3); }
 
         .color-palette {
-            display: flex;
-            gap: 10px;
-            background: rgba(0, 0, 0, 0.6);
-            padding: 10px 15px;
-            border-radius: 30px;
-            pointer-events: auto;
-            backdrop-filter: blur(4px);
+            display: flex; gap: 10px; background: rgba(0, 0, 0, 0.6);
+            padding: 10px 15px; border-radius: 30px;
+            pointer-events: auto; /* Включаем клики по палитре */
         }
         .color-circle {
-            width: 32px;
-            height: 32px;
-            border-radius: 50%;
-            border: 2px solid rgba(255, 255, 255, 0.8);
-            cursor: pointer;
+            width: 32px; height: 32px; border-radius: 50%;
+            border: 2px solid #fff; cursor: pointer;
         }
         .color-circle:active { transform: scale(0.9); }
     </style>
     
+    <!-- Карта импортов для Three.js -->
     <script type="importmap">
         {
             "imports": {
@@ -81,10 +57,8 @@
     </script>
 </head>
 <body>
-    <!-- Кнопка запуска -->
     <button id="start-ar-btn">Запустить AR</button>
 
-    <!-- Оверлей внутри AR -->
     <div id="ar-overlay">
         <div class="color-palette">
             <div class="color-circle" style="background: #ff5733;" data-color="0xff5733"></div>

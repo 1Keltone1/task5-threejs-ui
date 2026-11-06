@@ -20,10 +20,11 @@ export class ARScene {
         this.renderer.xr.enabled = true;
         document.body.appendChild(this.renderer.domElement);
 
+        // Свет (в дополнение к HDRI)
         const hemiLight = new THREE.HemisphereLight(0xffffff, 0xbbbbff, 1);
-        hemiLight.position.set(0.5, 1, 0.25);
         this.scene.add(hemiLight);
 
+        // Маркер (Reticle)
         this.reticle = new THREE.Mesh(
             new THREE.RingGeometry(0.15, 0.2, 32).rotateX(-Math.PI / 2),
             new THREE.MeshBasicMaterial({ color: 0x00ff00 })
@@ -32,8 +33,10 @@ export class ARScene {
         this.reticle.visible = false;
         this.scene.add(this.reticle);
 
+        // HDRI Освещение
         await this.loadEnvironment('hdr/puresky.hdr');
 
+        // Контроллер тапов
         const controller = this.renderer.xr.getController(0);
         controller.addEventListener('select', () => this.onSelect());
         this.scene.add(controller);
@@ -46,7 +49,7 @@ export class ARScene {
         return new Promise((resolve, reject) => {
             new RGBELoader().load(url, (hdr) => {
                 hdr.mapping = THREE.EquirectangularReflectionMapping;
-                this.scene.environment = hdr;
+                this.scene.environment = hdr; // Применяем HDRI
                 resolve();
             }, undefined, reject);
         });
@@ -54,7 +57,7 @@ export class ARScene {
 
     async startAR() {
         if (!navigator.xr) {
-            alert("WebXR не поддерживается вашим браузером. Используйте Chrome на Android.");
+            alert("WebXR не поддерживается. Используйте Chrome на Android.");
             return;
         }
 
@@ -71,7 +74,6 @@ export class ARScene {
             document.getElementById('start-ar-btn').style.display = 'none';
             document.getElementById('ar-overlay').style.display = 'flex';
 
-            // Возвращаем UI при выходе
             this.xrSession.addEventListener('end', () => {
                 document.getElementById('start-ar-btn').style.display = 'block';
                 document.getElementById('ar-overlay').style.display = 'none';
@@ -79,7 +81,7 @@ export class ARScene {
             });
 
         } catch (error) {
-            console.error("Ошибка запуска AR:", error);
+            console.error("Ошибка AR:", error);
             alert("Не удалось запустить AR: " + error.message);
         }
     }

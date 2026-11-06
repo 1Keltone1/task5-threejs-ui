@@ -6,9 +6,9 @@ export class ObjectManager {
         this.scene = scene;
         this.objects = [];
         this.models = {};
-        this.currentModelKey = 'pin';
-        this.currentColor = 0xffffff;
-        this.currentScale = 0.5; // Размер моделек
+        this.currentModelKey = 'pin'; // Какая модель будет добавлена следующей
+        this.currentColor = 0xffffff; // Текущий цвет
+        this.currentScale = 0.5;      // Масштаб
     }
 
     async init() {
@@ -20,24 +20,27 @@ export class ObjectManager {
         try {
             this.models.pin = await loadModel('models/pin.glb');
             this.models.sovunya = await loadModel('models/sovunya.glb');
+            console.log('Модели загружены');
         } catch (error) {
             console.error('Ошибка загрузки моделей:', error);
         }
     }
 
+    // Вызывается при тапе по экрану
     placeObject(reticle) {
         const template = this.models[this.currentModelKey];
         if (!template) return;
 
         const clone = template.clone(true);
         
+        // Настраиваем PBR-материал
         clone.traverse((node) => {
             if (node.isMesh) {
                 const oldMap = node.material.map || null;
                 node.material = new THREE.MeshStandardMaterial({
                     color: this.currentColor,
                     roughness: 0.4,
-                    metalness: 0.1,
+                    metalness: 0.2,
                     map: oldMap
                 });
             }
@@ -49,14 +52,15 @@ export class ObjectManager {
         
         this.scene.add(clone);
         this.objects.push(clone);
-        return clone;
     }
 
+    // Получить последний добавленный объект
     getLastObject() {
         if (this.objects.length === 0) return null;
         return this.objects[this.objects.length - 1];
     }
 
+    // Изменить цвет ТОЛЬКО последнего
     changeColor(colorHex) {
         this.currentColor = colorHex; 
         const lastObj = this.getLastObject();
@@ -67,11 +71,12 @@ export class ObjectManager {
         });
     }
 
-    rotateLast(amount = Math.PI / 4) {
+    // Повернуть ТОЛЬКО последний (плавно)
+    rotateLast() {
         const lastObj = this.getLastObject();
         if (!lastObj) return;
         
-        const targetRotation = lastObj.rotation.y + amount;
+        const targetRotation = lastObj.rotation.y + (Math.PI / 4);
         const startTime = performance.now();
         const duration = 300;
         const startRotation = lastObj.rotation.y;
@@ -86,12 +91,17 @@ export class ObjectManager {
         requestAnimationFrame(animateRotation);
     }
 
+    // Переключить модель для следующих объектов
     toggleModel() {
         this.currentModelKey = this.currentModelKey === 'pin' ? 'sovunya' : 'pin';
+        console.log('Следующая модель:', this.currentModelKey);
     }
 
+    // Удалить ВСЕ объекты
     clearAll() {
-        this.objects.forEach(obj => this.scene.remove(obj));
+        this.objects.forEach(obj => {
+            this.scene.remove(obj);
+        });
         this.objects = []; 
     }
 }
