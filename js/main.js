@@ -6,7 +6,6 @@ async function main() {
     const arScene = new ARScene();
     await arScene.init();
 
-    // Передаем arScene в ObjectManager, чтобы у него был доступ к ретиклу
     const objectManager = new ObjectManager(arScene.scene, arScene);
     await objectManager.init();
 

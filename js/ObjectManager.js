@@ -4,7 +4,7 @@ import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
 export class ObjectManager {
     constructor(scene, arScene) {
         this.scene = scene;
-        this.arScene = arScene; // Нам нужен доступ к ретиклу
+        this.arScene = arScene;
         this.objects = [];
         this.models = {};
         this.currentModelKey = 'pin';
@@ -26,7 +26,6 @@ export class ObjectManager {
         }
     }
 
-    // Вызывается ТОЛЬКО по кнопке "Добавить"
     addModel() {
         const reticle = this.arScene.reticle;
         if (!reticle || !reticle.visible) {
